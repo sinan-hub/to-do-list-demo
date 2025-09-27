@@ -1,71 +1,66 @@
-import { useCallback, useEffect, useState } from 'react'
-import Button from '../components/Button'
-import ClickCount from '../components/ClickCount'
-import styles from '../styles/home.module.css'
+/* I want to create a To Do List
+- add items to the To Do List
+- delete items to the To Do List */
 
-function throwError() {
-  console.log(
-    // The function body() is not defined
-    document.body()
-  )
-}
+import React, { useState } from 'react';
+import Head from 'next/head';
+import link from 'next/link';
+import { v4 as uuidv4 } from 'uuid';
 
-function Home() {
-  const [count, setCount] = useState(0)
-  const increment = useCallback(() => {
-    setCount((v) => v + 1)
-  }, [setCount])
+export default function Home() {
+// create a state for To Do List items with deafult items like: learn react.js , learn next.js, learn copilot
+  const [TodoList,setToDoList] = useState([
+    { id: uuidv4(), text: 'Learn React.js' },
+    { id: uuidv4(), text: 'Learn Next.js' },
+    { id: uuidv4(), text: 'Learn Copilot' },
+  ]);
 
-  useEffect(() => {
-    const r = setInterval(() => {
-      increment()
-    }, 1000)
-
-    return () => {
-      clearInterval(r)
+  // create a state for to do items
+  const [todoItem, setTodoItem] = useState('');
+   // function that handles adding new items to the To Do List
+    const handleAddItem = () => {
+        //create new item object
+        const newItem = {
+            id: uuidv4(),
+            text: todoItem
+        };
+        //update the state with the new item
+        setToDoList([...TodoList, newItem]);
+        setTodoItem('');
     }
-  }, [increment])
+    //function that handles deleting items from the To Do List
+    const handleDeleteItem = (id) => {
+        //filter out the item with the given id
+        const filteredList = TodoList.filter(item => item.id !== id);
+        //update the state with the new list
+        setToDoList(filteredList);
+    }
+    //render input field and button, to add items and  list of items
+    return (                
+        <div className='container' >
+            <Head>
+                <title>To Do List</title>
+                <link rel="icon" href="/favicon.ico" />
+            </Head>   
+            <main>
+                <h1>To Do List</h1>
+                <input 
+                    type="text"
+                    value={todoItem}
+                    onChange={(e) => setTodoItem(e.target.value)}
+                />
+                <button onClick={handleAddItem}>Add Item</button>
+                <ul>
+                    {TodoList.map(item => (
+                        <li key={item.id}>
+                            {item.text}
+                            <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
+                        </li>
+                    ))}
+                </ul>
+            </main> 
+        </div>  
+    );
 
-  return (
-    <main className={styles.main}>
-      <h1>Fast Refresh Demo</h1>
-      <p>
-        Fast Refresh is a Next.js feature that gives you instantaneous feedback
-        on edits made to your React components, without ever losing component
-        state.
-      </p>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          Auto incrementing value. The counter won't reset after edits or if
-          there are errors.
-        </p>
-        <p>Current value: {count}</p>
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>Component with state.</p>
-        <ClickCount />
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          The button below will throw 2 errors. You'll see the error overlay to
-          let you know about the errors but it won't break the page or reset
-          your state.
-        </p>
-        <Button
-          onClick={(e) => {
-            setTimeout(() => document.parentNode(), 0)
-            throwError()
-          }}
-        >
-          Throw an Error
-        </Button>
-      </div>
-      <hr className={styles.hr} />
-    </main>
-  )
 }
 
-export default Home
